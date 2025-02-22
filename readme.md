@@ -11,7 +11,7 @@ The `mlx90640` package provides a ROS node that interfaces with the MLX90640 the
 1. Clone the repository into your ROS workspace:
     ```sh
     cd ~/dev_ws/src
-    git clone https://github.com/neochaos42/mlx90640_ros
+    git clone <repository_url>
     ```
 
 2. Install dependencies:
@@ -53,6 +53,7 @@ The node can be configured using parameters specified in the `config/mlx906040_c
 The node publishes the following topics:
 
 - `/thermal_image` (`sensor_msgs/msg/Image`): The thermal image data from the MLX90640 camera.
+- `/average_temperature` (`std_msgs/msg/Float32`): The average temperature calculated from the thermal image data.
 
 ## License
 

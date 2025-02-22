@@ -1,5 +1,6 @@
 #include <rclcpp/rclcpp.hpp>
 #include <sensor_msgs/msg/image.hpp>
+#include <std_msgs/msg/float32.hpp>
 #include <std_msgs/msg/header.hpp>
 #include "mlx90640/MLX90640_I2C_Driver.h"
 #include "mlx90640/MLX90640_API.h"
@@ -50,6 +51,9 @@ public:
         // Create a publisher for the thermal image
         thermal_image_publisher_ = this->create_publisher<sensor_msgs::msg::Image>("thermal_image", 10);
 
+        // Create a publisher for the average temperature
+        avg_temp_publisher_ = this->create_publisher<std_msgs::msg::Float32>("average_temperature", 10);
+
         // Create a timer to read and publish the thermal image periodically
         timer_ = this->create_wall_timer(
             std::chrono::milliseconds(1000 / refresh_rate_), // Calculate interval based on refresh rate
@@ -88,9 +92,16 @@ private:
 
         // Publish the thermal image
         thermal_image_publisher_->publish(std::move(thermal_image_msg));
+
+        // Calculate and publish the average temperature
+        float avg_temp = MLX90640_GetTa(frameData, &params_);
+        auto avg_temp_msg = std::make_unique<std_msgs::msg::Float32>();
+        avg_temp_msg->data = avg_temp;
+        avg_temp_publisher_->publish(std::move(avg_temp_msg));
     }
 
     rclcpp::Publisher<sensor_msgs::msg::Image>::SharedPtr thermal_image_publisher_;
+    rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr avg_temp_publisher_;
     rclcpp::TimerBase::SharedPtr timer_;
     paramsMLX90640 params_; // Store the parameters as a member variable
 

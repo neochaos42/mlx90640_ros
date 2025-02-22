@@ -17,7 +17,7 @@
 #ifndef _MLX90640_I2C_Driver_H_
 #define _MLX90640_I2C_Driver_H_
 
-#include <stdint.h>
+#include <cstdint>
 #include "MLX90640_API.h"
     extern void MLX90640_I2CInit(void);
     extern int MLX90640_I2CGeneralReset(void);

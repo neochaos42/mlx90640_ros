@@ -1,22 +1,23 @@
-#include <stdio.h>
-#include <stdlib.h>
+#include <iostream>
+#include <fstream>
 #include <fcntl.h>
 #include <unistd.h>
 #include <sys/ioctl.h>
 #include <linux/i2c-dev.h>
-#include <stdint.h>
-#include <string.h>
-#include <errno.h>
+#include <cstdint>
+#include <cstring>
+#include <cerrno>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <linux/i2c.h>
 #include "mlx90640/MLX90640_I2C_Driver.h"
+
 #define I2C_DEVICE "/dev/i2c-1"  // Change this to the appropriate I2C bus on your Jetson Orin
 
 static int i2c_fd = -1;
 
 // Function to initialize the I2C communication
-void MLX90640_I2CInit(void) {
+void MLX90640_I2CInit() {
     if (i2c_fd >= 0) {
         close(i2c_fd);
     }
@@ -34,7 +35,7 @@ int MLX90640_I2CRead(uint8_t slaveAddr, uint16_t startAddress, uint16_t nMemAddr
     int ret;
 
     if (i2c_fd < 0) {
-        fprintf(stderr, "I2C device not initialized\n");
+        std::cerr << "I2C device not initialized" << std::endl;
         return -1;
     }
 
@@ -70,7 +71,7 @@ int MLX90640_I2CWrite(uint8_t slaveAddr, uint16_t writeAddress, uint16_t data) {
     int ret;
 
     if (i2c_fd < 0) {
-        fprintf(stderr, "I2C device not initialized\n");
+        std::cerr << "I2C device not initialized" << std::endl;
         return -1;
     }
 
@@ -97,11 +98,11 @@ int MLX90640_I2CWrite(uint8_t slaveAddr, uint16_t writeAddress, uint16_t data) {
 }
 
 // Function to perform a general I2C reset
-int MLX90640_I2CGeneralReset(void) {
+int MLX90640_I2CGeneralReset() {
     uint8_t buf[2] = {0x00, 0x06};  // I2C general call reset command
 
     if (i2c_fd < 0) {
-        fprintf(stderr, "I2C device not initialized\n");
+        std::cerr << "I2C device not initialized" << std::endl;
         return -1;
     }
 

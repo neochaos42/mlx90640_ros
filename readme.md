@@ -11,7 +11,7 @@ The `mlx90640` package provides a ROS node that interfaces with the MLX90640 the
 1. Clone the repository into your ROS workspace:
     ```sh
     cd ~/dev_ws/src
-    git clone <repository_url>
+    git clone https://github.com/neochaos42/mlx90640_ros
     ```
 
 2. Install dependencies:

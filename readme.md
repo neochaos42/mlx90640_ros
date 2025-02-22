@@ -58,10 +58,6 @@ The node publishes the following topics:
 
 This project is licensed under the Apache License 2.0 - see the `LICENSE` file for details.
 
-## Maintainer
-
-- [dev](mailto:necohaos42@gmail.com)
-
 ## Contributing
 
 Contributions are welcome! Please open an issue or submit a pull request for any improvements or bug fixes.

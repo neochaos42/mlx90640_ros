@@ -4,8 +4,12 @@
   <name>mlx90640</name>
   <version>0.0.0</version>
   <description>TODO: Package description</description>
-  <maintainer email="{your_email}">dev</maintainer>
-  <license>TODO: License declaration</license>
+  <maintainer email="necohaos42@gmail.com">dev</maintainer>
+  <license>Apache License 2.0</license>
+
+  <depend>rclcpp</depend>
+  <depend>std_msgs</depend>
+  <depend>sensor_msgs</depend>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 

@@ -13,20 +13,31 @@ public:
     MLX90640Node()
         : Node("mlx90640_node")
     {
-        // Declare parameters
+        // Declare parameters with default values
         this->declare_parameter<uint8_t>("camera.i2c_address", 0x33);
         this->declare_parameter<int>("camera.refresh_rate", 8);
         this->declare_parameter<float>("camera.emissivity", 0.95);
         this->declare_parameter<float>("camera.ambient_temperature", 23.0);
 
-        // Get parameters
+        // Get parameters from the parameter server
         this->get_parameter("camera.i2c_address", i2c_address_);
         this->get_parameter("camera.refresh_rate", refresh_rate_);
         this->get_parameter("camera.emissivity", emissivity_);
         this->get_parameter("camera.ambient_temperature", ambient_temperature_);
 
+        // Validate parameters
+        if (refresh_rate_ <= 0) {
+            RCLCPP_ERROR(this->get_logger(), "Invalid refresh rate: %d", refresh_rate_);
+            rclcpp::shutdown();
+            return;
+        }
+
         // Initialize the I2C communication
-        MLX90640_I2CInit();
+        if (MLX90640_I2CInit() != 0) {
+            RCLCPP_ERROR(this->get_logger(), "Failed to initialize I2C communication");
+            rclcpp::shutdown();
+            return;
+        }
 
         // Initialize the MLX90640 sensor
         uint16_t eeData[MLX90640_EEPROM_DUMP_NUM];
@@ -34,6 +45,8 @@ public:
         if (status != MLX90640_NO_ERROR)
         {
             RCLCPP_ERROR(this->get_logger(), "Failed to initialize MLX90640 sensor");
+            MLX90640_I2CClose();
+            rclcpp::shutdown();
             return;
         }
 
@@ -42,6 +55,8 @@ public:
         if (status != MLX90640_NO_ERROR)
         {
             RCLCPP_ERROR(this->get_logger(), "Failed to extract parameters from MLX90640 sensor");
+            MLX90640_I2CClose();
+            rclcpp::shutdown();
             return;
         }
 
@@ -61,6 +76,7 @@ public:
     }
 
 private:
+    // Function to read and publish the thermal image
     void publishThermalImage()
     {
         // Read the frame data from the sensor
@@ -100,10 +116,13 @@ private:
         avg_temp_publisher_->publish(std::move(avg_temp_msg));
     }
 
+    // ROS 2 publishers
     rclcpp::Publisher<sensor_msgs::msg::Image>::SharedPtr thermal_image_publisher_;
     rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr avg_temp_publisher_;
     rclcpp::TimerBase::SharedPtr timer_;
-    paramsMLX90640 params_; // Store the parameters as a member variable
+
+    // MLX90640 parameters
+    paramsMLX90640 params_;
 
     // Parameters
     uint8_t i2c_address_;
@@ -114,9 +133,11 @@ private:
 
 int main(int argc, char *argv[])
 {
+    // Initialize the ROS 2 node
     rclcpp::init(argc, argv);
     auto node = std::make_shared<MLX90640Node>();
     rclcpp::spin(node);
+    MLX90640_I2CClose();
     rclcpp::shutdown();
     return 0;
 }

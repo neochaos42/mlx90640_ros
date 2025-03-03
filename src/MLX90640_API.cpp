@@ -38,18 +38,18 @@ static int IsPixelBad(uint16_t pixel,paramsMLX90640 *params);
 static int ValidateFrameData(uint16_t *frameData);
 static int ValidateAuxData(uint16_t *auxData);
   
-int MLX90640_DumpEE(uint8_t slaveAddr, uint16_t *eeData)
+int MLX90640_DumpEE(uint8_t deviceAddr, uint16_t *eeData)
 {
-     return MLX90640_I2CRead(slaveAddr, MLX90640_EEPROM_START_ADDRESS, MLX90640_EEPROM_DUMP_NUM, eeData);
+     return MLX90640_I2CRead(deviceAddr, MLX90640_EEPROM_START_ADDRESS, MLX90640_EEPROM_DUMP_NUM, eeData);
 }
 
-int MLX90640_SynchFrame(uint8_t slaveAddr)
+int MLX90640_SynchFrame(uint8_t deviceAddr)
 {
     uint16_t dataReady = 0;
     uint16_t statusRegister;
     int error = 1;
     
-    error = MLX90640_I2CWrite(slaveAddr, MLX90640_STATUS_REG, MLX90640_INIT_STATUS_VALUE);
+    error = MLX90640_I2CWrite(deviceAddr, MLX90640_STATUS_REG, MLX90640_INIT_STATUS_VALUE);
     if(error == -MLX90640_I2C_NACK_ERROR)
     {
         return error;
@@ -57,7 +57,7 @@ int MLX90640_SynchFrame(uint8_t slaveAddr)
     
     while(dataReady == 0)
     {
-        error = MLX90640_I2CRead(slaveAddr, MLX90640_STATUS_REG, 1, &statusRegister);
+        error = MLX90640_I2CRead(deviceAddr, MLX90640_STATUS_REG, 1, &statusRegister);
         if(error != MLX90640_NO_ERROR)
         {
             return error;
@@ -69,12 +69,12 @@ int MLX90640_SynchFrame(uint8_t slaveAddr)
    return MLX90640_NO_ERROR;   
 }
 
-int MLX90640_TriggerMeasurement(uint8_t slaveAddr)
+int MLX90640_TriggerMeasurement(uint8_t deviceAddr)
 {
     int error = 1;
     uint16_t ctrlReg;
     
-    error = MLX90640_I2CRead(slaveAddr, MLX90640_CTRL_REG, 1, &ctrlReg);
+    error = MLX90640_I2CRead(deviceAddr, MLX90640_CTRL_REG, 1, &ctrlReg);
     
     if ( error != MLX90640_NO_ERROR) 
     {
@@ -82,7 +82,7 @@ int MLX90640_TriggerMeasurement(uint8_t slaveAddr)
     }    
                                                 
     ctrlReg |= MLX90640_CTRL_TRIG_READY_MASK;
-    error = MLX90640_I2CWrite(slaveAddr, MLX90640_CTRL_REG, ctrlReg);
+    error = MLX90640_I2CWrite(deviceAddr, MLX90640_CTRL_REG, ctrlReg);
     
     if ( error != MLX90640_NO_ERROR)
     {
@@ -96,7 +96,7 @@ int MLX90640_TriggerMeasurement(uint8_t slaveAddr)
         return error;
     }    
     
-    error = MLX90640_I2CRead(slaveAddr, MLX90640_CTRL_REG, 1, &ctrlReg);
+    error = MLX90640_I2CRead(deviceAddr, MLX90640_CTRL_REG, 1, &ctrlReg);
     
     if ( error != MLX90640_NO_ERROR)
     {
@@ -111,7 +111,7 @@ int MLX90640_TriggerMeasurement(uint8_t slaveAddr)
     return MLX90640_NO_ERROR;    
 }
     
-int MLX90640_GetFrameData(uint8_t slaveAddr, uint16_t *frameData)
+int MLX90640_GetFrameData(uint8_t deviceAddr, uint16_t *frameData)
 {
     uint16_t dataReady = 0;
     uint16_t controlRegister1;
@@ -122,7 +122,7 @@ int MLX90640_GetFrameData(uint8_t slaveAddr, uint16_t *frameData)
     
     while(dataReady == 0)
     {
-        error = MLX90640_I2CRead(slaveAddr, MLX90640_STATUS_REG, 1, &statusRegister);
+        error = MLX90640_I2CRead(deviceAddr, MLX90640_STATUS_REG, 1, &statusRegister);
         if(error != MLX90640_NO_ERROR)
         {
             return error;
@@ -131,25 +131,25 @@ int MLX90640_GetFrameData(uint8_t slaveAddr, uint16_t *frameData)
         dataReady = MLX90640_GET_DATA_READY(statusRegister); 
     }      
     
-    error = MLX90640_I2CWrite(slaveAddr, MLX90640_STATUS_REG, MLX90640_INIT_STATUS_VALUE);
+    error = MLX90640_I2CWrite(deviceAddr, MLX90640_STATUS_REG, MLX90640_INIT_STATUS_VALUE);
     if(error == -MLX90640_I2C_NACK_ERROR)
     {
         return error;
     }
                      
-    error = MLX90640_I2CRead(slaveAddr, MLX90640_PIXEL_DATA_START_ADDRESS, MLX90640_PIXEL_NUM, frameData); 
+    error = MLX90640_I2CRead(deviceAddr, MLX90640_PIXEL_DATA_START_ADDRESS, MLX90640_PIXEL_NUM, frameData); 
     if(error != MLX90640_NO_ERROR)
     {
         return error;
     }                       
     
-    error = MLX90640_I2CRead(slaveAddr, MLX90640_AUX_DATA_START_ADDRESS, MLX90640_AUX_NUM, data); 
+    error = MLX90640_I2CRead(deviceAddr, MLX90640_AUX_DATA_START_ADDRESS, MLX90640_AUX_NUM, data); 
     if(error != MLX90640_NO_ERROR)
     {
         return error;
     }     
         
-    error = MLX90640_I2CRead(slaveAddr, MLX90640_CTRL_REG, 1, &controlRegister1);
+    error = MLX90640_I2CRead(deviceAddr, MLX90640_CTRL_REG, 1, &controlRegister1);
     frameData[832] = controlRegister1;
     //frameData[833] = statusRegister & 0x0001;
     frameData[833] = MLX90640_GET_FRAME(statusRegister);
@@ -254,7 +254,7 @@ int MLX90640_ExtractParameters(uint16_t *eeData, paramsMLX90640 *mlx90640)
 
 //------------------------------------------------------------------------------
 
-int MLX90640_SetResolution(uint8_t slaveAddr, uint8_t resolution)
+int MLX90640_SetResolution(uint8_t deviceAddr, uint8_t resolution)
 {
     uint16_t controlRegister1;
     uint16_t value;
@@ -264,12 +264,12 @@ int MLX90640_SetResolution(uint8_t slaveAddr, uint8_t resolution)
     value = ((uint16_t)resolution << MLX90640_CTRL_RESOLUTION_SHIFT);
     value &= ~MLX90640_CTRL_RESOLUTION_MASK;
     
-    error = MLX90640_I2CRead(slaveAddr, MLX90640_CTRL_REG, 1, &controlRegister1);
+    error = MLX90640_I2CRead(deviceAddr, MLX90640_CTRL_REG, 1, &controlRegister1);
     
     if(error == MLX90640_NO_ERROR)
     {
         value = (controlRegister1 & MLX90640_CTRL_RESOLUTION_MASK) | value;
-        error = MLX90640_I2CWrite(slaveAddr, MLX90640_CTRL_REG, value);        
+        error = MLX90640_I2CWrite(deviceAddr, MLX90640_CTRL_REG, value);        
     }    
     
     return error;
@@ -277,13 +277,13 @@ int MLX90640_SetResolution(uint8_t slaveAddr, uint8_t resolution)
 
 //------------------------------------------------------------------------------
 
-int MLX90640_GetCurResolution(uint8_t slaveAddr)
+int MLX90640_GetCurResolution(uint8_t deviceAddr)
 {
     uint16_t controlRegister1;
     int resolutionRAM;
     int error;
     
-    error = MLX90640_I2CRead(slaveAddr, MLX90640_CTRL_REG, 1, &controlRegister1);
+    error = MLX90640_I2CRead(deviceAddr, MLX90640_CTRL_REG, 1, &controlRegister1);
     if(error != MLX90640_NO_ERROR)
     {
         return error;
@@ -295,7 +295,7 @@ int MLX90640_GetCurResolution(uint8_t slaveAddr)
 
 //------------------------------------------------------------------------------
 
-int MLX90640_SetRefreshRate(uint8_t slaveAddr, uint8_t refreshRate)
+int MLX90640_SetRefreshRate(uint8_t deviceAddr, uint8_t refreshRate)
 {
     uint16_t controlRegister1;
     uint16_t value;
@@ -305,11 +305,11 @@ int MLX90640_SetRefreshRate(uint8_t slaveAddr, uint8_t refreshRate)
     value = ((uint16_t)refreshRate << MLX90640_CTRL_REFRESH_SHIFT);
     value &= ~MLX90640_CTRL_REFRESH_MASK;
     
-    error = MLX90640_I2CRead(slaveAddr, MLX90640_CTRL_REG, 1, &controlRegister1);
+    error = MLX90640_I2CRead(deviceAddr, MLX90640_CTRL_REG, 1, &controlRegister1);
     if(error == MLX90640_NO_ERROR)
     {
         value = (controlRegister1 & MLX90640_CTRL_REFRESH_MASK) | value;
-        error = MLX90640_I2CWrite(slaveAddr, MLX90640_CTRL_REG, value);
+        error = MLX90640_I2CWrite(deviceAddr, MLX90640_CTRL_REG, value);
     }    
     
     return error;
@@ -317,13 +317,13 @@ int MLX90640_SetRefreshRate(uint8_t slaveAddr, uint8_t refreshRate)
 
 //------------------------------------------------------------------------------
 
-int MLX90640_GetRefreshRate(uint8_t slaveAddr)
+int MLX90640_GetRefreshRate(uint8_t deviceAddr)
 {
     uint16_t controlRegister1;
     int refreshRate;
     int error;
     
-    error = MLX90640_I2CRead(slaveAddr, MLX90640_CTRL_REG, 1, &controlRegister1);
+    error = MLX90640_I2CRead(deviceAddr, MLX90640_CTRL_REG, 1, &controlRegister1);
     if(error != MLX90640_NO_ERROR)
     {
         return error;
@@ -335,18 +335,18 @@ int MLX90640_GetRefreshRate(uint8_t slaveAddr)
 
 //------------------------------------------------------------------------------
 
-int MLX90640_SetInterleavedMode(uint8_t slaveAddr)
+int MLX90640_SetInterleavedMode(uint8_t deviceAddr)
 {
     uint16_t controlRegister1;
     uint16_t value;
     int error;
     
-    error = MLX90640_I2CRead(slaveAddr, MLX90640_CTRL_REG, 1, &controlRegister1);
+    error = MLX90640_I2CRead(deviceAddr, MLX90640_CTRL_REG, 1, &controlRegister1);
     
     if(error == 0)
     {
         value = (controlRegister1 & ~MLX90640_CTRL_MEAS_MODE_MASK);
-        error = MLX90640_I2CWrite(slaveAddr, MLX90640_CTRL_REG, value);        
+        error = MLX90640_I2CWrite(deviceAddr, MLX90640_CTRL_REG, value);        
     }    
     
     return error;
@@ -354,18 +354,18 @@ int MLX90640_SetInterleavedMode(uint8_t slaveAddr)
 
 //------------------------------------------------------------------------------
 
-int MLX90640_SetChessMode(uint8_t slaveAddr)
+int MLX90640_SetChessMode(uint8_t deviceAddr)
 {
     uint16_t controlRegister1;
     uint16_t value;
     int error;
         
-    error = MLX90640_I2CRead(slaveAddr, MLX90640_CTRL_REG, 1, &controlRegister1);
+    error = MLX90640_I2CRead(deviceAddr, MLX90640_CTRL_REG, 1, &controlRegister1);
     
     if(error == 0)
     {
         value = (controlRegister1 | MLX90640_CTRL_MEAS_MODE_MASK);
-        error = MLX90640_I2CWrite(slaveAddr, MLX90640_CTRL_REG, value);        
+        error = MLX90640_I2CWrite(deviceAddr, MLX90640_CTRL_REG, value);        
     }    
     
     return error;
@@ -373,13 +373,13 @@ int MLX90640_SetChessMode(uint8_t slaveAddr)
 
 //------------------------------------------------------------------------------
 
-int MLX90640_GetCurMode(uint8_t slaveAddr)
+int MLX90640_GetCurMode(uint8_t deviceAddr)
 {
     uint16_t controlRegister1;
     int modeRAM;
     int error;
     
-    error = MLX90640_I2CRead(slaveAddr, MLX90640_CTRL_REG, 1, &controlRegister1);
+    error = MLX90640_I2CRead(deviceAddr, MLX90640_CTRL_REG, 1, &controlRegister1);
     if(error != 0)
     {
         return error;

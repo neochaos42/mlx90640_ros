@@ -8,6 +8,6 @@ def generate_launch_description():
             executable='mlx90640_node',
             name='mlx90640_node',
             output='screen',
-            parameters=['config/mlx906040_config.yaml']
+            parameters=['config/mlx90640_config.yaml'] 
         )
     ])

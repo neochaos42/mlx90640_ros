@@ -1,0 +1,7 @@
+mlx90640_node:
+  ros__parameters:
+    camera:
+      i2c_address: 0x33
+      refresh_rate: 8  # in Hz
+      emissivity: 0.95
+      ambient_temperature: 23.0  # in Celsius

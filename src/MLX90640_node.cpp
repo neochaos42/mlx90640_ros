@@ -25,6 +25,12 @@ public:
         this->get_parameter("camera.emissivity", emissivity_);
         this->get_parameter("camera.ambient_temperature", ambient_temperature_);
 
+        // Log the retrieved parameters
+        RCLCPP_INFO(this->get_logger(), "i2c_address: 0x%02x", i2c_address_);
+        RCLCPP_INFO(this->get_logger(), "refresh_rate: %d Hz", refresh_rate_);
+        RCLCPP_INFO(this->get_logger(), "emissivity: %f", emissivity_);
+        RCLCPP_INFO(this->get_logger(), "ambient_temperature: %f Celsius", ambient_temperature_);
+
         // Validate parameters
         if (refresh_rate_ <= 0) {
             RCLCPP_ERROR(this->get_logger(), "Invalid refresh rate: %d", refresh_rate_);
@@ -38,6 +44,7 @@ public:
             rclcpp::shutdown();
             return;
         }
+        RCLCPP_INFO(this->get_logger(), "Successfully connected to I2C");
 
         // Initialize the MLX90640 sensor
         uint16_t eeData[MLX90640_EEPROM_DUMP_NUM];
@@ -65,14 +72,17 @@ public:
 
         // Create a publisher for the thermal image
         thermal_image_publisher_ = this->create_publisher<sensor_msgs::msg::Image>("thermal_image", 10);
+        RCLCPP_INFO(this->get_logger(), "Thermal image publisher created");
 
         // Create a publisher for the average temperature
         avg_temp_publisher_ = this->create_publisher<std_msgs::msg::Float32>("average_temperature", 10);
+        RCLCPP_INFO(this->get_logger(), "Average temperature publisher created");
 
         // Create a timer to read and publish the thermal image periodically
         timer_ = this->create_wall_timer(
             std::chrono::milliseconds(1000 / refresh_rate_), // Calculate interval based on refresh rate
             std::bind(&MLX90640Node::publishThermalImage, this));
+        RCLCPP_INFO(this->get_logger(), "Timer created with interval: %d ms", 1000 / refresh_rate_);
     }
 
 private:
@@ -108,12 +118,14 @@ private:
 
         // Publish the thermal image
         thermal_image_publisher_->publish(std::move(thermal_image_msg));
+        RCLCPP_INFO(this->get_logger(), "Thermal image published");
 
         // Calculate and publish the average temperature
         float avg_temp = MLX90640_GetTa(frameData, &params_);
         auto avg_temp_msg = std::make_unique<std_msgs::msg::Float32>();
         avg_temp_msg->data = avg_temp;
         avg_temp_publisher_->publish(std::move(avg_temp_msg));
+        RCLCPP_INFO(this->get_logger(), "Average temperature published: %f", avg_temp);
     }
 
     // ROS 2 publishers

@@ -15,13 +15,16 @@
  *
  */
 #ifndef _MLX90640_I2C_Driver_H_
-#define _MLX90640_I2C_Driver_H_
+    #define _MLX90640_I2C_Driver_H_
 
-#include <cstdint>
-#include "MLX90640_API.h"
-    extern int MLX90640_I2CInit(void);
-    extern int MLX90640_I2CGeneralReset(void);
-    extern int MLX90640_I2CRead(uint8_t deviceAddr, uint16_t startAddress, uint16_t nMemAddressRead, uint16_t *data);
-    extern int MLX90640_I2CWrite(uint8_t deviceAddr, uint16_t writeAddress, uint16_t data);
-    extern int MLX90640_I2CClose(void);
+    #include <cstdint>
+    #include <rclcpp/rclcpp.hpp>
+    #include "MLX90640_API.h"
+
+    int MLX90640_I2CInit(rclcpp::Logger logger);
+    int MLX90640_I2CGeneralReset(rclcpp::Logger logger);
+    int MLX90640_I2CRead(rclcpp::Logger logger, uint8_t deviceAddr, uint16_t startAddress, uint16_t nMemAddressRead, uint16_t *data);
+    int MLX90640_I2CWrite(rclcpp::Logger logger, uint8_t deviceAddr, uint16_t writeAddress, uint16_t data);
+    int MLX90640_I2CClose(rclcpp::Logger logger);
+
 #endif

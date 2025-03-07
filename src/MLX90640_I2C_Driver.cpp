@@ -10,7 +10,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <linux/i2c.h>
-#include "rclcpp/rclcpp.hpp"
+#include <rclcpp/rclcpp.hpp>
 #include "mlx90640/MLX90640_I2C_Driver.h"
 
 #define I2C_DEVICE "/dev/i2c-1"  // Change this to the appropriate I2C bus on your Jetson Orin

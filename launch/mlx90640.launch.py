@@ -15,6 +15,7 @@ def generate_launch_description():
             executable='mlx90640_node',
             name='mlx90640_node',
             output='screen',
-            parameters=[config] 
+            parameters=[config],
+            arguments=['--ros-args', '--log-level', 'debug']
         )
     ])
